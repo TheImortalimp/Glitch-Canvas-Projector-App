@@ -19,7 +19,8 @@ jobs:
       - run: npm ci
       - run: npm test
       - name: Build unsigned installer
-        run: npm run package:win
+        # electron-builder publishes implicitly when it detects CI and fails without a token; only build the artifact.
+        run: npm run package:win -- --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
       - uses: actions/upload-artifact@v4
