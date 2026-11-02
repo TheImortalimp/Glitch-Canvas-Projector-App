@@ -10,6 +10,9 @@ contextBridge.exposeInMainWorld('projector', Object.freeze({
  minimize:()=>ipcRenderer.invoke('projector:minimize'),
  close:()=>ipcRenderer.invoke('projector:close'),
  shortcutStatus:()=>ipcRenderer.invoke('projector:shortcut-status'),
+ setVjMode:enabled=>ipcRenderer.invoke('projector:vj-mode',enabled),
+ onVjRequest:fn=>{if(typeof fn==='function')ipcRenderer.on('projector:vj-request',()=>fn());},
+ onVjModeChanged:fn=>{if(typeof fn==='function')ipcRenderer.on('projector:vj-mode-changed',(_e,value)=>fn(value===true));},
  onDisplaysChanged:fn=>{if(typeof fn==='function')ipcRenderer.on('projector:displays-changed',(_e,data)=>fn(data));},
  onFullscreenChanged:fn=>{if(typeof fn==='function')ipcRenderer.on('projector:fullscreen-changed',(_e,value)=>fn(value));}
 }));

@@ -1,7 +1,7 @@
 {
   "name": "glitch-canvas-projector-app",
   "productName": "Glitch Canvas Projector App",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Live screen and window projection with the Glitch Canvas effects engine",
   "main": "src/main/main.cjs",

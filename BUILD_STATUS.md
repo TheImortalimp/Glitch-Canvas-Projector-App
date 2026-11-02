@@ -2,7 +2,19 @@
 
 Prepared: 2026-11-02. Target: Windows 10/11 x64 (Intel/AMD compatible).
 
-## Completed in the preparation environment
+## Version 1.0.1 — VJ mode
+
+Adds **Ctrl+Alt+T** VJ mode: all HUD hidden, window fullscreen on its current monitor at 50% opacity, kept on top of other windows, not click-through. **Esc** or **Ctrl+Alt+T** exits.
+
+Done on 2026-11-02 (Windows 11 x64, single display):
+
+- `node --test tests/*.test.cjs` passed (5/5), including mocked main-process tests (sender/argument validation, renderer-confirmed entry, Esc and Ctrl+Alt+T exit, restore of fullscreen and always-on-top state) and renderer tests (all HUD hidden, show/hide button hidden, exit restores HUD, STOP SOURCE exits).
+- A real Electron run confirmed entering VJ mode gives opacity 0.5, fullscreen and always-on-top, and Esc restores opacity 1, windowed and not on top.
+- `npm run package:win` produced an **unsigned** NSIS installer, `Glitch Canvas Projector App Setup 1.0.1.exe`; its asar contents were checked for the VJ code and version 1.0.1.
+
+Not done: running the installer on a clean machine, a second monitor or projector, pressing the real global Ctrl+Alt+T hotkey, code signing and SmartScreen assessment, long-session profiling, and a repeat `npm audit`. The 1.0.0 audit result below has not been re-run.
+
+## Completed in the preparation environment (1.0.0)
 
 - Node.js 22 dependency installation with `npm ci` completed.
 - `npm test` passed: mocked capture authorization and display selection; renderer/preset/Unicode/Easter-egg behavior; bounded temporal frame-buffer allocation/release.

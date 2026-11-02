@@ -27,7 +27,8 @@ A Windows desktop projector for a screen, application window or local video, wit
 2. Pick a starting look or one of **250 fixed MACHINE presets**, or adjust the individual effect sliders. The snapshot settings do not change, though the visual effects themselves animate. Flash/strobe effects are available; use care if anyone is photosensitive. Randomization can enable them.
 3. Use **Move to display…** in the top bar to select a connected monitor/projector. This moves the **same borderless app window**; it is not a separate projector window and does not implement network protocols such as Chromecast or Miracast. A projector must be available as a Windows display.
 4. Drag the top bar to reposition the window; drag its native window edges/corners to resize. Press **Ctrl+Alt+F** or the square button for fullscreen. If another app owns the global shortcut, the button remains available and the shortcut works while focused where possible. Use **HIDE CONTROL U.I.** for a cleaner image, and **SHOW CONTROL U.I.** to return.
-5. Choose **STOP SOURCE** to stop capture, or **CHANGE SCREEN / WINDOW** to select a different source. Closing the app also stops the stream. To avoid visual feedback, do not capture the same display that is showing the projector window.
+5. **VJ mode (v1.0.1):** while a source is active, press **Ctrl+Alt+T** to hide the entire HUD, including the show/hide button, and cover the whole monitor the window is on at **50% window opacity** so whatever is underneath shines through. Press **Esc** (while the window is focused), or **Ctrl+Alt+T** again (works from any app unless another program owns that shortcut), to leave VJ mode; the full HUD returns, and **Ctrl+Alt+F** and **STOP SOURCE** also end it. The window stays on top of other windows while VJ mode is active, but it is **not click-through**: it still receives mouse and keyboard input, so clicks do not reach the apps underneath. The on-top state is released when you leave VJ mode. If Windows does not honour window opacity on a given driver or display setup, test it before a show.
+6. Choose **STOP SOURCE** to stop capture, or **CHANGE SCREEN / WINDOW** to select a different source. Closing the app also stops the stream. To avoid visual feedback, do not capture the same display that is showing the projector window.
 
 You can also drag a supported local video file into the window or use **OPEN VIDEO**. Local file decoding depends on the codecs bundled with Electron; playback is muted, and no microphone or system audio is recorded.
 
@@ -66,10 +67,15 @@ The generated NSIS installer is in `dist/`. `npm run package:dir` creates an unp
 
 - `npm ci`, `npm test`, `npm run package:win`; install the generated installer on a clean 64-bit Windows 10/11 machine.
 - Capture a screen and a separate app window, cancel the picker, switch sources, stop, and confirm capture indicators disappear. Check sensitive and DRM windows behave as expected.
-- Connect two displays, select the second, drag and resize the frameless window, toggle Ctrl+Alt+F twice, hide/show controls, and disconnect/reconnect the second display.
+- Connect two displays, select the second, drag and resize the frameless window, toggle Ctrl+Alt+F twice, hide/show controls, enter and leave VJ mode (Ctrl+Alt+T, Esc, Ctrl+Alt+T again) on each display and confirm the 50% opacity and full-monitor coverage, and disconnect/reconnect the second display.
 - Exercise the two live-source effects (FRAME ECHO and TIME SLICES), R3 effects, all basic controls, 250 machine selections/search, Unicode choices, custom save/load, export/import and legacy preset migration.
 - Run longer sessions at different resolutions while watching Windows Task Manager for CPU/GPU/memory growth. Repeat starting, stopping, switching sources and resizing; independently profile before claiming no leaks.
 - Verify DPI scaling, visual alignment, high contrast, keyboard navigation, error handling and the actual signed installer on target systems.
+
+## Version history
+
+- **1.0.1** — VJ mode (Ctrl+Alt+T): hides the entire HUD, fills the current monitor at 50% opacity, stays on top of other windows (not click-through); Esc or Ctrl+Alt+T exits.
+- **1.0.0** — initial release.
 
 ## Project files
 

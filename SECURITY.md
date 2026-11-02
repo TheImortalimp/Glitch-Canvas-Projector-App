@@ -7,3 +7,5 @@ For a suspected vulnerability, contact the project owner privately using the rep
 Automated mocked tests do not establish that a build is leak-free, signed, safe from all vulnerabilities, or ready for production. Complete the release checklist in README.md and use current supported dependencies.
 
 The user-provided GHOST / OF ME Easter egg intentionally enables Flash, Strobe and continual randomization. Warn users and consider photosensitivity before activation.
+
+VJ mode (Ctrl+Alt+T) hides the whole interface and keeps the window on top at 50% opacity. Entering is only possible while a source is active and is confirmed by the renderer through a validated, sender-checked IPC call; Esc and Ctrl+Alt+T always exit. The window is never click-through. Remember that a source being projected, and anything visible through the transparent window, may be seen by an audience.

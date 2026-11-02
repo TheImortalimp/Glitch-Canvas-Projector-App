@@ -13,7 +13,7 @@ function showStage(label){
  document.getElementById('live-source').textContent=label;
  if(isAutoGlitching)persistentAutoGlitchLoop();if(isAiWarpActive)startGlitchOverlay();if(!isLooping)mainRenderLoop();report('Source active: '+label);
 }
-function stopSource(){clearSource();stopGlitchOverlay();activeEffects=[];document.body.classList.remove('playing','ui-hidden');isUIHidden=false;toggleUiBtn.textContent='HIDE CONTROL U.I.';document.getElementById('ui-toggle-tab').style.display='none';report('Source stopped. Choose a screen or window to begin.');}
+function stopSource(){clearSource();stopGlitchOverlay();activeEffects=[];if(document.body.classList.contains('vj-mode')&&window.projector)window.projector.setVjMode(false).catch(()=>{});document.body.classList.remove('playing','ui-hidden','vj-mode');isUIHidden=false;toggleUiBtn.textContent='HIDE CONTROL U.I.';document.getElementById('ui-toggle-tab').style.display='none';report('Source stopped. Choose a screen or window to begin.');}
 async function chooseCapture(source){
  let stream=null;try{
   await window.projector.selectSource(source.id);
@@ -50,6 +50,16 @@ for(const eventName of ['dragenter','dragover'])document.addEventListener(eventN
 document.addEventListener('dragleave',e=>{if(!e.relatedTarget)document.body.classList.remove('dragging-file');});
 document.addEventListener('drop',e=>{e.preventDefault();document.body.classList.remove('dragging-file');const file=e.dataTransfer?.files?.[0];if(file)useLocalVideo(file);});
 window.addEventListener('beforeunload',clearSource);
+function applyVjMode(on){
+ document.body.classList.toggle('vj-mode',on);
+ if(on){if(sourceDialog.open)sourceDialog.close();return;}
+ document.body.classList.remove('ui-hidden');isUIHidden=false;toggleUiBtn.textContent='HIDE CONTROL U.I.';
+}
+function requestVjMode(){
+ if(!document.body.classList.contains('playing')){report('VJ mode needs an active source. Choose a screen, window or video first.',true);return;}
+ window.projector.setVjMode(true).catch(e=>report('Could not start VJ mode: '+e.message,true));
+}
+if(window.projector){window.projector.onVjRequest(requestVjMode);window.projector.onVjModeChanged(applyVjMode);}
 const displaySelect=document.getElementById('display-select');
 function updateDisplays(displays){const old=displaySelect.value;displaySelect.replaceChildren();const first=document.createElement('option');first.value='';first.textContent='Move to display…';displaySelect.appendChild(first);for(const d of displays){const option=document.createElement('option');option.value=d.id;option.textContent=`${d.label}${d.primary?' · primary':''} (${d.width} × ${d.height})`;displaySelect.appendChild(option);}if([...displaySelect.options].some(o=>o.value===old))displaySelect.value=old;}
 if(window.projector){window.projector.displays().then(updateDisplays).catch(e=>report('Could not list displays: '+e.message,true));window.projector.onDisplaysChanged(updateDisplays);window.projector.onFullscreenChanged(v=>{document.getElementById('fullscreen-window').setAttribute('aria-label',v?'Exit fullscreen':'Enter fullscreen');});window.projector.shortcutStatus().then(ok=>{if(!ok)document.getElementById('shortcut-note').textContent='Shortcut unavailable globally; use the fullscreen button or press Ctrl+Alt+F while focused.';});}

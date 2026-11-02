@@ -5,6 +5,7 @@ let win = null;
 let offeredSources = new Map();
 let pendingSource = null;
 let shortcutRegistered = false;
+let vjShortcutRegistered = false;
 let offerTimer = null;
 let sourceEpoch = 0;
 function clearOffers(){offeredSources.clear();pendingSource=null;clearTimeout(offerTimer);offerTimer=null;}
@@ -34,7 +35,34 @@ async function moveToDisplay(id){
   if(wasFull)win.setFullScreen(true);
   return {ok:true};
 }
-function toggleFullScreen(){if(win && !win.isDestroyed())win.setFullScreen(!win.isFullScreen());}
+const VJ_OPACITY = 0.5;
+const VJ_TOGGLE_GAP = 400;
+let vjMode = false;
+let vjWasFullScreen = false;
+let vjWasOnTop = false;
+let lastVjToggle = 0;
+function sendVjMode(){ if(win && !win.isDestroyed()) win.webContents.send('projector:vj-mode-changed',vjMode); }
+function enterVjMode(){
+  if(vjMode || !win || win.isDestroyed()) return;
+  vjMode=true;vjWasFullScreen=win.isFullScreen();vjWasOnTop=win.isAlwaysOnTop();
+  win.setOpacity(VJ_OPACITY);win.setAlwaysOnTop(true,'screen-saver');if(!vjWasFullScreen)win.setFullScreen(true);
+  sendVjMode();
+}
+function exitVjMode(){
+  if(!vjMode) return;
+  vjMode=false;
+  if(win && !win.isDestroyed()){win.setOpacity(1);win.setAlwaysOnTop(vjWasOnTop);if(!vjWasFullScreen && win.isFullScreen())win.setFullScreen(false);sendVjMode();}
+}
+// Entering is confirmed by the renderer so VJ mode only starts while a source is active; leaving never depends on it.
+function toggleVjMode(){
+  const now=Date.now();if(now-lastVjToggle<VJ_TOGGLE_GAP)return;lastVjToggle=now;
+  if(vjMode){exitVjMode();return;}
+  if(win && !win.isDestroyed())win.webContents.send('projector:vj-request');
+}
+function toggleFullScreen(){
+  if(vjMode){exitVjMode();return;}
+  if(win && !win.isDestroyed())win.setFullScreen(!win.isFullScreen());
+}
 function registerHandlers(){
   ipcMain.handle('projector:list-sources', async event => {
     requireTrusted(event);clearOffers();const epoch=++sourceEpoch;
@@ -54,6 +82,12 @@ function registerHandlers(){
   ipcMain.handle('projector:displays',event=>{requireTrusted(event);return displays();});
   ipcMain.handle('projector:move-display',async(event,id)=>{requireTrusted(event);if(typeof id!=='string'||id.length>40)throw new Error('Invalid display');return moveToDisplay(id);});
   ipcMain.handle('projector:fullscreen',event=>{requireTrusted(event);toggleFullScreen();return true;});
+  ipcMain.handle('projector:vj-mode',(event,enabled)=>{
+    requireTrusted(event);
+    if(typeof enabled!=='boolean')throw new Error('Invalid VJ mode');
+    if(enabled)enterVjMode();else exitVjMode();
+    return vjMode;
+  });
   ipcMain.handle('projector:minimize',event=>{requireTrusted(event);win.minimize();return true;});
   ipcMain.handle('projector:close',event=>{requireTrusted(event);win.close();return true;});
   ipcMain.handle('projector:shortcut-status',event=>{requireTrusted(event);return shortcutRegistered;});
@@ -73,11 +107,18 @@ function createWindow(){
   win.once('ready-to-show',()=>win.show());
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   win.webContents.on('will-navigate',(event)=>event.preventDefault());
-  win.webContents.on('before-input-event',(event,input)=>{if(!shortcutRegistered && input.type==='keyDown' && input.control && input.alt && input.key.toLowerCase()==='f'){event.preventDefault();toggleFullScreen();}});
+  win.webContents.on('before-input-event',(event,input)=>{
+    if(input.type!=='keyDown' || typeof input.key!=='string')return;
+    const key=input.key.toLowerCase();
+    if(vjMode && key==='escape'){event.preventDefault();exitVjMode();return;}
+    if(!input.control || !input.alt || input.isAutoRepeat)return;
+    if(!shortcutRegistered && key==='f'){event.preventDefault();toggleFullScreen();}
+    else if(!vjShortcutRegistered && key==='t'){event.preventDefault();toggleVjMode();}
+  });
   win.on('enter-full-screen',()=>win.webContents.send('projector:fullscreen-changed',true));
   win.on('leave-full-screen',()=>win.webContents.send('projector:fullscreen-changed',false));
-  win.on('closed',()=>{win=null;sourceEpoch++;clearOffers();});
+  win.on('closed',()=>{win=null;vjMode=false;sourceEpoch++;clearOffers();});
 }
-app.whenReady().then(()=>{configureSession();registerHandlers();createWindow();try { shortcutRegistered=globalShortcut.register('Control+Alt+F',toggleFullScreen); } catch { shortcutRegistered=false; }screen.on('display-added',sendDisplays);screen.on('display-removed',sendDisplays);screen.on('display-metrics-changed',sendDisplays);app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)createWindow();});});
+app.whenReady().then(()=>{configureSession();registerHandlers();createWindow();try { shortcutRegistered=globalShortcut.register('Control+Alt+F',toggleFullScreen); } catch { shortcutRegistered=false; }try { vjShortcutRegistered=globalShortcut.register('Control+Alt+T',toggleVjMode); } catch { vjShortcutRegistered=false; }screen.on('display-added',sendDisplays);screen.on('display-removed',sendDisplays);screen.on('display-metrics-changed',sendDisplays);app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)createWindow();});});
 app.on('window-all-closed',()=>app.quit());
 app.on('will-quit',()=>globalShortcut.unregisterAll());
