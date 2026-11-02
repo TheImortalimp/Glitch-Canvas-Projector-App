@@ -1,0 +1,63 @@
+AI WARP ENGINE - R3 Canvas Edition (v6.4)
+Author: River Lyle Reuveni (Imortalimp) - https://imortalimp.nl
+GitHub: https://github.com/TheImortalimp
+Role: Creative Technologist & Audio/Visual Software Creator
+Contact/social: @Imortalimp
+Description: Creative coding, glitch visual synthesizers, Web Audio SID emulators,
+software experiments, music, and interactive art.
+Keywords: River Lyle Reuveni, Imortalimp, creative coding, Web Audio, SID synth,
+glitch engine, retro games, AI experiments, audio visualizer, digital art
+Credits: Arena.ai Agent Mode; generative AI and the open-source community.
+
+======================================================================
+TRIBUTE TO MICROSOFT .NET
+======================================================================
+
+With gratitude to the Microsoft .NET team and its open-source contributors.
+The .NET runtime and Windows Forms make this Windows desktop edition possible.
+This installer bundles .NET 8 for Windows x64; no separate .NET installation
+is required. Thank you for the framework, tools and community behind the app.
+
+This acknowledgment does not imply Microsoft sponsorship or endorsement.
+The app's CC0 / Unlicense terms do not replace third-party component licenses.
+The next license page presents the bundled .NET runtime's MIT license.
+The installed app also includes the exact .NET runtime licenses and
+THIRD-PARTY-NOTICES, WebView2 SDK notices, NAudio's MIT license and Windows SDK
+terms. Please preserve these files when redistributing the complete app.
+
+======================================================================
+LICENSE TERMS
+======================================================================
+
+1. AI WARP ENGINE software (this application)
+
+This software is dedicated to the Public Domain under the CC0 1.0 Universal
+Public Domain Dedication (https://creativecommons.org/publicdomain/zero/1.0/)
+and The Unlicense (https://unlicense.org/).
+
+You may copy, modify, publish, use, compile, sell, or distribute it for any
+purpose, with or without attribution.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+2. imortalimp.nl site terms (index.html / home.html)
+
+(c) 2026 River Lyle Reuveni - imortalimp.nl - Some rights reserved (CC BY 4.0).
+Site works, including "FLAMABLE AI CAMPING GAS SID", are licensed under
+Creative Commons Attribution 4.0 International
+(https://creativecommons.org/licenses/by/4.0/): attribute River Lyle Reuveni
+(imortalimp.nl) and Arena.ai Agent.
+
+Site pages also state: (c) 2026 Imortalimp ~ All Rights Reserved. Third-party
+material referenced on the site remains the property of its respective owners.
+
+3. Bundled components
+
+This installer bundles the Microsoft .NET runtime (MIT License) and uses the
+Microsoft Edge WebView2 runtime, which is governed by Microsoft's own terms.
+WebView2 must already be installed; its runtime installer is not bundled.

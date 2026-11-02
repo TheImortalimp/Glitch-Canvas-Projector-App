@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; connect-src 'none'; object-src 'none'; base-uri 'none'; frame-src 'none'" http-equiv="Content-Security-Policy"/><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="#090b0c" name="theme-color"/><title>Glitch Canvas Projector App</title><style>#suggestedVideo, #suggestedPlaylist, #suggestedVideo2, #suggestedVideo3, #testCanvas, #suggestedYoutube,
+    #ytInput, #startBtn, #randomizeBtn, #autoGlitchBtn, #continualRandomizeBtn,
+    #sliderContainer, #wired-btn,
+  #suggestedMoonlight{
+        opacity: 0.2;
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    #suggestedVideo:hover, #suggestedPlaylist:hover, #suggestedVideo2:hover, #suggestedVideo3:hover, #testCanvas:hover, #suggestedYoutube:hover,
+    #suggestedMoonlight:hover,
+    #ytInput:hover, #startBtn:hover, #randomizeBtn:hover, #autoGlitchBtn:hover, #continualRandomizeBtn:hover,
+    #sliderContainer:hover, #wired-btn:hover {
+        opacity: 1;
+    }
+
+    html, body {
+      margin: 0; padding: 0; overflow: hidden;
+      background: black;
+      transition: transform 0.1s ease-in-out;
+      height: 100%; width: 100%;
+      cursor: crosshair;
+    }
+    canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+    }
+    #glitchCanvas { z-index: 0; }
+    #sourceVideo {
+      filter: brightness(0.9) contrast(1.1); /* Slightly crush blacks and pop whites for a more analog feel */
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 1;
+      border: none;
+    }
+
+   #suggestedVideo, #suggestedPlaylist, #suggestedVideo2, #suggestedVideo3, #testCanvas, #suggestedYoutube,
+  #suggestedMoonlight{
+      font-family: Impact, 'Arial Black', 'Franklin Gothic Heavy', sans-serif;
+      text-align: center;
+      color: white;
+      cursor: pointer;
+      z-index: 5;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      -webkit-user-select: none; /* Safari */
+      -ms-user-select: none; /* IE 10+ and Edge */
+      user-select: none; /* Standard syntax */
+    }
+
+    /*
+    /=============================================
+    |                                             |
+    |   HERE ARE THE LAYOUT PERCENTAGES FOR THE   |
+    |           SUGGESTED VIDEO LINKS             |
+    |                                             |
+    \=============================================/ 
+    */
+    #suggestedVideo {
+      top: 0%;
+    }
+
+    #suggestedVideo3 {
+      top: 5%;
+    }
+
+    #suggestedVideo2 {
+      top: 10%;
+    }
+
+    #suggestedYoutube {
+      top: 15%;
+    }
+
+    #suggestedPlaylist {
+      top: 20%;
+    }
+
+    #suggestedMoonlight {
+      top: 25%;
+    }
+    
+    #testCanvas {
+      bottom: 35%;
+    }
+
+    input, button {
+      position: absolute;
+      font-family: monospace;
+      font-size: 14px;
+      padding: 10px 16px;
+      color: white;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid white;
+      z-index: 5;
+      transition: all 0.2s ease-in-out;
+    }
+    button:active {
+      transform: scale(0.95) rotate(-1deg);
+      background: rgba(255, 0, 255, 0.3);
+      box-shadow: 0 0 8px white;
+    }
+    #ytInput {
+      top: 40%; left: 50%; transform: translate(-50%, -50%);
+      width: 320px;
+    }
+    #startBtn {
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+    }
+    #randomizeBtn { top: 60px; right: 20px; display: none; z-index: 10; }
+    #autoGlitchBtn { top: 20px; right: 20px; display: none; z-index: 10; }
+    #continualRandomizeBtn { top: 100px; right: 20px; display: none; z-index: 10; width: 230px; }
+    #aiWarpBtn { top: 156px; right: 20px; display: none; z-index: 10; width: 230px; }
+
+    /* New slider container */
+    #sliderContainer {
+      position: absolute;
+      top: 85px;
+      left: 20px;
+      z-index: 10;
+      background: rgba(0,0,0,0.5);
+      padding: 10px;
+      border: 1px solid white;
+      border-radius: 5px;
+      display: none; /* Hidden until start */
+    }
+    .slider-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .slider-group label {
+      font-family: monospace;
+      font-size: 12px;
+      color: white;
+      width: 120px; /* Align sliders */
+    }
+    .slider-group input[type="range"] {
+        margin-left: 120px;
+    }
+
+    .lock-button {
+      font-family: monospace;
+      font-size: 11px;
+      color: white;
+      background: black;
+      border: 1px solid white;
+      margin-left: 230%;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .lock-button.locked {
+      color: black;
+      background: white;
+    }
+
+    /* Notification style */
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 255, 13, 0.8);
+      color: black;
+      padding: 10px 20px;
+      border-radius: 5px;
+      z-index: 100;
+      font-family: monospace;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      pointer-events: none;
+    }
+
+    /* --- Wired Button CRT Styles --- */
+    .wired-button {
+      font-family: 'Courier New', Courier, monospace;
+      text-decoration: none;
+      color: #00ffff;
+      background: rgba(0, 20, 20, 0.5); /* More faded background */
+      border: 2px solid #00ffff;
+      border-radius: 8px;
+      cursor: pointer;
+      overflow: hidden; /* Keep scanlines inside */
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.5),
+                  0 0 20px rgba(0, 255, 255, 0.3),
+                  inset 0 0 15px rgba(0, 255, 255, 0.2);
+      text-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff;
+      animation: crt-flicker 0.2s infinite;
+      transition: all 0.2s ease;
+    }
+
+    .wired-button:hover {
+        background: rgba(0, 40, 40, 0.7);
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.8),
+                    0 0 30px rgba(0, 255, 255, 0.5),
+                    inset 0 0 20px rgba(0, 255, 255, 0.3);
+    }
+
+    .wired-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.15) 50%, rgba(0,0,0,0.3) 50%);
+      background-size: 100% var(--scanline-thickness, 4px);
+      opacity: 0.6;
+      animation: scanline-move var(--scanline-speed, 4s) linear infinite;
+      pointer-events: none;
+    }
+
+    #wired-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 15px 30px;
+      font-size: 1.5em;
+      z-index: 20; /* Ensure it's on top */
+    }
+
+    @keyframes crt-flicker {
+      0%, 100% { opacity: 0.9; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes scanline-move {
+      from { background-position: 0 0; }
+      to { background-position: 0 -8px; } /* Faster movement */
+    }
+
+    /* --- UI Toggle Tab Styles (CRT Themed) --- */
+    #ui-toggle-tab {
+      position: fixed;
+      right: -145px; /* Start mostly hidden, adjust based on final width */
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 9999;
+      transition: right 0.3s ease-in-out, opacity 0.2s ease-in-out;
+      cursor: pointer;
+      opacity: 0.4; /* More visible when collapsed */
+    }
+
+    #ui-toggle-tab:hover {
+      right: 0;
+      opacity: 1;
+    }
+
+    #toggle-ui-btn {
+      /* Inherit wired-button styles */
+      font-family: 'Courier New', Courier, monospace;
+      text-decoration: none;
+      color: #00ffff;
+      background: rgba(0, 20, 20, 0.7);
+      border: 2px solid #00ffff;
+      border-right: none; /* Hide the border that's off-screen */
+      border-radius: 8px 0 0 8px; /* Round corners on the visible side */
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.5),
+                  0 0 20px rgba(0, 255, 255, 0.3),
+                  inset 0 0 15px rgba(0, 255, 255, 0.2);
+      text-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff;
+      animation: crt-flicker 0.2s infinite;
+      padding: 10px 16px;
+      font-size: 14px;
+      white-space: nowrap; /* Prevent text wrapping */
+      position: relative; /* For scanline pseudo-element */
+      overflow: hidden;
+    }
+
+
+/* --- Preset Dropdown Menu Styles --- */
+/* --- Preset Dropdown Menu Styles (inspired by double-oh-six.html) --- */
+#preset-toggle-btn {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9991; /* Above the dropdown container */
+  font-family: 'Share Tech Mono', 'Consolas', monospace;
+  font-size: 0.9rem; /* Slimmer */
+  padding: 5px 15px; /* Slimmer */
+  border-radius: 0 0 8px 8px; /* from preset-toggle-btn */
+  font-weight: normal; /* Slimmer */
+  cursor: pointer;
+  display: none; /* Hidden until playback starts */
+  opacity: 0.5;
+  overflow: hidden; /* Keep scanlines inside */
+  position: relative; /* For scanline pseudo-element */
+  color: #00ffff;
+  background: rgba(0, 20, 20, 0.5);
+  border: 2px solid #00ffff;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 15px rgba(0, 255, 255, 0.2);
+  text-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff;
+  animation: crt-flicker 0.2s infinite;
+  transition: all 0.2s ease;
+}
+
+#preset-toggle-btn:hover {
+  background: #39ffff;
+  box-shadow: 0 2px 15px rgba(0, 255, 247, 0.8);
+}
+
+#preset-toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.15) 50%, rgba(0,0,0,0.3) 50%);
+  background-size: 100% var(--scanline-thickness, 4px);
+  opacity: 0.6;
+  animation: scanline-move var(--scanline-speed, 4s) linear infinite;
+  pointer-events: none;
+}
+
+#preset-dropdown-container { /* This is the actual dropdown panel */
+  position: fixed;
+  top: 0;
+  left: 50%; /* Center horizontally */
+  transform: translateX(-50%); /* Center horizontally */
+  width: 90%; /* Constrain width */
+  max-width: 600px; /* Max width to prevent it from being too wide */
+  height: 0; /* Initially closed */
+  overflow: hidden; /* Keep scanlines inside */
+  background-color: rgba(10, 26, 35, 0.5); /* Dark, 50% transparent background */
+  border-bottom: 2px solid #00fff7;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3), inset 0 0 15px rgba(0, 255, 255, 0.2);
+  z-index: 9990; /* Below the toggle button */
+  transition: height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+  display: none; /* Hidden initially, will be shown by JS */
+  flex-direction: column; /* To stack preset-bar and current-preset-display */
+  justify-content: center;
+  align-items: center;
+  padding-top: 30px; /* Adjust for slimmer toggle button */
+  box-sizing: border-box;
+  opacity: 0; /* Initially hidden for transition */
+}
+
+#preset-dropdown-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.15) 50%, rgba(0,0,0,0.3) 50%);
+  background-size: 100% var(--scanline-thickness, 4px);
+  opacity: 0.6;
+  animation: scanline-move var(--scanline-speed, 4s) linear infinite; /* Scanline effect */
+  pointer-events: none;
+}
+
+.preset-bar { 
+  display: flex; 
+  position: relative; /* Establish a positioning context for absolute children */
+  width: 100%;
+  height: 100%;
+} 
+.preset-dropdown, .preset-name-input, .preset-save-btn, .preset-delete-btn, .preset-delete-all-btn, .preset-nav-btn { 
+  font-family: 'Share Tech Mono', 'Consolas', monospace; 
+  font-size: 0.9rem; /* Slimmer */
+  border: 2px solid #00fff7; 
+  border-radius: 4px;
+  margin: 2px; /* Slimmer */
+  padding: 4px 8px; /* Slimmer */
+  outline: none; 
+  transition: box-shadow 0.2s, border-color 0.2s, background 0.2s, color 0.2s; 
+  box-shadow: 0 0 8px rgba(0, 255, 247, 0.6); 
+  opacity: 1; /* Controls are now fully opaque, but their background is transparent */
+  position: absolute; /* Use absolute positioning for precise control */
+  color: #00fff7;
+  background: rgba(16, 28, 34, 0.5);
+  cursor: pointer;
+}
+
+ 
+.preset-dropdown:focus, .preset-name-input:focus, .preset-save-btn:focus, .preset-delete-btn:focus, .preset-delete-all-btn:focus, .preset-nav-btn:focus { 
+  border-color: #fff; 
+  box-shadow: 0 0 12px #00fff7cc; 
+  opacity: 1; 
+} 
+ 
+.preset-save-btn { 
+  cursor: pointer; 
+  font-weight: bold;
+  right: 0; /* Aligned to the far right */
+  top: 0px;
+  transform: translateX(0%); /* Adjust position with transform */
+}
+
+.preset-delete-btn {
+  cursor: pointer; 
+  font-weight: bold;
+  right: 5%; /* Aligned to the right */
+  top: 32px;
+  transform: translateX(5%); /* Adjust position with transform */
+  background: rgba(34, 16, 16, 0.5);
+  color: #ff2a2a;
+  border-color: #ff2a2a;
+}
+
+.preset-delete-all-btn {
+  cursor: pointer;
+  font-weight: bold;
+  right: 0; /* Aligned to the far right */
+  top: 32px;
+  transform: translateX(0%);
+  background: rgba(255, 0, 255, 0.5); /* Magenta */
+  color: #ffffff;
+  border-color: #ff00ff;
+}
+ 
+.preset-nav-btn { 
+  width: 28px; /* Slimmer */
+  height: 28px; /* Slimmer */
+  background: #101c22; 
+  color: #00fff7; 
+  border: 2px solid #00fff7; 
+  border-radius: 50%; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 1rem; /* Slimmer */
+  cursor: pointer;
+  box-shadow: 0 0 8px #00fff799;
+}
+
+.preset-nav-btn.left {
+  top: 30px;
+  left: calc(50% - 150px); /* 150px to the left of center */
+  transform: translateX(-50%);
+}
+
+.preset-nav-btn.right {
+  top: 30px;
+  left: calc(50% + 150px); /* 150px to the right of center */
+  transform: translateX(-50%);
+}
+.preset-dropdown { 
+  top: 0px; left: 66%; transform: translateX(-66%);
+}
+
+.preset-nav-btn:hover {
+  background: #00fff7; 
+  color: #101c22; 
+  border-color: #fff; 
+}
+
+.preset-save-btn:hover, .preset-delete-btn:hover {
+  background: #00fff7;
+  color: #101c22;
+  border-color: #fff;
+}
+
+.preset-delete-btn:hover {
+    background: #ff2a2a;
+    color: white;
+}
+
+.preset-delete-all-btn:hover {
+    background: #ff00ff;
+    color: black;
+}
+
+.current-preset-display {
+  position: absolute; /* Position relative to the container */
+  top: 35px; /* Position from the top of the container */
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Courier New', Times, serif;
+  color: crimson;
+  text-shadow: 0 0 5px rgb(127, 255, 246);
+  pointer-events: none;
+  font-size: 1.15rem;
+  text-align: center;
+  /* display: none; */ /* Hidden by default - REMOVED FOR DEBUGGING */
+  z-index: 1; /* On top of other elements in the container */
+  opacity: 1;
+}
+
+
+    /* --- Mobile Responsiveness --- */
+    @media (max-width: 768px) {
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background: black;
+        }
+
+        canvas {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #ytInput {
+            width: 80vw;
+            max-width: 320px; /* Keep max size */
+            font-size: 12px;
+            transform: scale(1) translate(-150%, -150%);
+        }
+        #startBtn {
+            font-size: 12px;
+            padding: 8px 12px;
+            transform: scale(0.33) translate(-150%, -150%);
+        }
+        #randomizeBtn, #autoGlitchBtn, #continualRandomizeBtn, #aiWarpBtn {
+            width: auto; /* Fit content */
+            max-width: 40vw; /* Prevent from being too wide */
+            font-size: 10px;
+            padding: 6px 8px;
+            right: 5px;
+            white-space: nowrap; /* Prevent line breaks */
+            transform: scale(1);
+            transform-origin: top right;
+        }
+        #continualRandomizeBtn, #aiWarpBtn {
+            white-space: normal; /* Allow longer buttons to wrap */
+            text-align: center;
+        }
+        #wired-btn {
+            left: 5px;
+            top: 5px;
+            padding: 8px 10px;
+            font-size: 0.8em;
+            transform: scale(1);
+            transform-origin: top left;
+        }
+        #sliderContainer {
+            left: 5px;
+            top: 60px; /* Adjust to be below wired-btn */
+            width: calc(100vw - 10px);
+            max-width: 320px;
+            box-sizing: border-box;
+            opacity: 0.4;
+            transform: scale(0.33);
+            transform-origin: top left;
+        }
+         #sliderContainer:hover {
+            opacity: 1;
+        }
+        .slider-group {
+            position: relative; /* For lock button positioning */
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        .slider-group label {
+            width: 100%;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+        .slider-group input[type="range"] {
+            width: 100%;
+            margin-left: 0;
+        }
+        .lock-button {
+            position: relative;
+            right: 5px;
+            top: 5px;
+            margin-left: 315px;
+            margin-top: 0;
+            padding: 2px 6px;
+            font-size: 10px;
+        }
+        h2[id^="suggested"] {
+            font-size: 0.7em;
+            line-height: 1.4;
+            transform: scale(0.33);
+        }
+        #testCanvas {
+             font-size: 0.7em;
+             transform: scale(0.33);
+        }
+
+        #ui-toggle-tab {
+            top: 50%; /* Move from middle to bottom */
+            right: 0px;
+            bottom: 10px;
+            transform: scale(1); /* Keep the user's explicit non-scaling for this element */
+            transform-origin: bottom right; /* Adjust origin for new position */
+            /* By REMOVING 'right: 20px', it will inherit 'right: -145px' from the desktop rule, making it correctly hidden by default */
+        }
+        #toggle-ui-btn {
+            font-size: 12px;
+            padding: 8px 12px;
+        }
+        
+        #preset-dropdown-container {
+            width: 98%; /* Take up more screen width */
+            padding-top: 35px;
+            box-sizing: border-box;
+            transform: scale(0.33);
+            transform-origin: top center;
+        }
+        .preset-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 5px;
+            width: 100%;
+            padding: 0 5px;
+            box-sizing: border-box;
+        }
+        .preset-dropdown, .preset-name-input, .preset-save-btn, .preset-delete-btn, .preset-delete-all-btn, .preset-nav-btn {
+            font-size: 0.8rem;
+            padding: 4px;
+            margin: 0;
+            position: static;
+            transform: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .current-preset-display {
+             position: static;
+             transform: none;
+             order: -2; /* Move to the top */
+             grid-column: 1 / -1; /* Span full width */
+             text-align: center;
+             margin-bottom: 5px;
+             font-size: 1rem;
+        }
+        .preset-name-input {
+            grid-column: 1 / -1; /* Span full width */
+            order: -1;
+        }
+    }
+  
+  /* Class to hide UI elements */
+  body.ui-hidden #suggestedVideo,
+  body.ui-hidden #suggestedPlaylist,
+  body.ui-hidden #suggestedVideo2,
+  body.ui-hidden #suggestedVideo3,
+  body.ui-hidden #testCanvas,
+  body.ui-hidden #suggestedYoutube,
+  body.ui-hidden #suggestedMoonlight,
+  body.ui-hidden #ytInput,
+  body.ui-hidden #startBtn,
+  body.ui-hidden #randomizeBtn,
+  body.ui-hidden #autoGlitchBtn,
+  body.ui-hidden #continualRandomizeBtn,
+  body.ui-hidden #sliderContainer,
+  body.ui-hidden #wired-btn,
+  body.ui-hidden #aiWarpBtn {
+    display: none !important; /* Use !important to override existing display properties */
+  }
+  .background-svg {
+    position: absolute;
+    z-index: -1;
+  }</style><style>
+:root{color-scheme:dark;--acid:#d4ff50;--cyan:#6deff2;--ink:#090b0c;--muted:#899690;--line:rgba(210,255,220,.16)}
+*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;background:#090b0c;color:#eff5e9;font-family:Arial,Helvetica,sans-serif;overflow:hidden;cursor:auto}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+#effects-wrapper{position:fixed;inset:0;background:#080b0b;overflow:hidden}#sourceVideo,#glitchCanvas{position:absolute;inset:0;width:100%;height:100%;border:0}#glitchCanvas{pointer-events:none}#effects-wrapper:after{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;box-shadow:inset 0 0 140px #0008}
+.shell{position:fixed;inset:0;z-index:10;pointer-events:none;display:flex;flex-direction:column}.shell>*{pointer-events:auto}.topbar{height:68px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 27px;border-bottom:1px solid var(--line);background:rgba(9,12,12,.92)}.brand{display:flex;align-items:center;gap:12px;color:#f2f8ee;text-decoration:none}.brand-icon{height:32px;width:32px;display:grid;place-items:center;border:1px solid var(--acid);color:var(--acid);font-size:16px}.brand strong{font-size:12px;letter-spacing:.18em}.brand small{display:block;font:9px monospace;color:var(--muted);letter-spacing:.18em;margin-top:3px}.top-right{display:flex;gap:14px;align-items:center;font:10px monospace;letter-spacing:.12em;color:var(--muted)}.live-dot{width:6px;height:6px;border-radius:50%;background:var(--acid);box-shadow:0 0 10px var(--acid);display:inline-block;margin-right:7px}.back{color:#b7c5b9;text-decoration:none;border-left:1px solid var(--line);padding-left:16px}.back:hover{color:var(--acid)}
+#landing{position:absolute;inset:68px 0 0;overflow:auto;background:radial-gradient(ellipse at 76% 40%,#20322b 0%,#101714 24%,#090b0c 64%);padding:clamp(28px,6vw,90px);display:flex;align-items:center}.intro{width:min(1220px,100%);margin:auto;display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(40px,7vw,110px);align-items:center}.eyebrow,.section-kicker{font:10px monospace;letter-spacing:.2em;color:var(--acid);text-transform:uppercase}.eyebrow:before{content:'◆';margin-right:9px}.intro h1{font-size:clamp(58px,8.5vw,126px);letter-spacing:-.085em;line-height:.82;margin:25px 0 28px;text-transform:uppercase}.intro h1 span{color:transparent;-webkit-text-stroke:1px #b9cec0;display:block}.intro p{font-size:15px;line-height:1.7;color:#9ca9a0;max-width:420px}.intro .subnote{font:10px monospace;color:#738078;margin-top:28px;letter-spacing:.06em}.visual{height:330px;position:relative;border:1px solid #526b554e;overflow:hidden;background:repeating-linear-gradient(0deg,transparent 0 3px,#9bff9c09 4px),radial-gradient(circle at 50% 50%,#85fb7a2b,transparent 58%),#111916}.visual:before,.visual:after{content:'';position:absolute;border:1px solid #baff7d52;transform:rotate(-12deg);inset:55px 25%;box-shadow:0 0 50px #a0ff3924,inset 0 0 45px #a0ff3918}.visual:after{inset:82px 17%;transform:rotate(20deg);border-color:#6deff25e}.visual-label{position:absolute;top:16px;left:17px;font:10px monospace;color:#a3bda7;letter-spacing:.14em}.visual-code{position:absolute;bottom:17px;right:17px;font:10px monospace;color:var(--acid)}.visual-center{position:absolute;inset:0;display:grid;place-items:center;font:700 clamp(55px,8vw,100px) monospace;color:#d4ff50;text-shadow:-5px 0 #f36a9d,5px 0 #62e1ed;letter-spacing:-.1em}.visual-center span{transform:skew(-8deg)}
+.launch{margin-top:30px;display:flex;gap:8px;max-width:580px}#ytInput,#startBtn{position:static;transform:none;opacity:1}#ytInput{flex:1;width:100%;min-width:0;background:#161e19;border:1px solid #526454;border-radius:0;padding:15px;color:white;font:12px monospace}#ytInput::placeholder{color:#7d8c80}#startBtn{background:var(--acid);color:#111b0c;border:1px solid var(--acid);font:700 11px monospace;letter-spacing:.08em;padding:15px 20px;white-space:nowrap}#startBtn:hover{background:#ecffb4}.sample-title{margin:32px 0 12px;color:#87958a;font:10px monospace;letter-spacing:.15em;text-transform:uppercase}.samples{display:flex;flex-wrap:wrap;gap:8px}.samples h2{position:static!important;transform:none!important;width:auto!important;margin:0!important;opacity:1!important;font:10px monospace!important;letter-spacing:.02em;color:#c4d0c5!important;border:1px solid #33443a;background:#111814;padding:9px 10px;cursor:pointer;text-align:left}.samples h2:hover{border-color:var(--acid);color:var(--acid)!important}.samples h2:focus-visible{outline:2px solid var(--cyan)}
+#workspace{display:none;flex:1;min-height:0;pointer-events:none}.playing #workspace{display:flex}.playing #landing{display:none}.control-panel{pointer-events:auto;align-self:stretch;margin:14px;width:340px;max-width:calc(100vw - 28px);background:rgba(10,15,13,.94);border:1px solid #4a5c4d;display:flex;flex-direction:column;box-shadow:0 15px 60px #0009;overflow:hidden}.panel-top{padding:20px 18px 15px;border-bottom:1px solid var(--line)}.panel-top h2{font-size:23px;letter-spacing:-.04em;margin:8px 0 5px}.panel-top p{color:#94a298;font:11px/1.5 monospace;margin:0}.panel-scroll{overflow:auto;padding:16px 18px 22px;scrollbar-color:#52644f #111}.panel-label{display:flex;align-items:center;justify-content:space-between;color:#b4c2b6;font:10px monospace;letter-spacing:.13em;text-transform:uppercase;margin:0 0 10px}.panel-label b{color:var(--acid)}.looks{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:18px}.looks button,.actions button,#preset-toggle-btn,.new-source{position:static;transform:none;width:auto;opacity:1;border:1px solid #405345;background:#162019;color:#dce9dc;padding:10px 5px;font:10px monospace}.looks button:hover,.actions button:hover,#preset-toggle-btn:hover,.new-source:hover{border-color:var(--acid);color:var(--acid)}.looks button.selected{background:var(--acid);border-color:var(--acid);color:#101a0b}.look-description{font:10px/1.5 monospace;color:#8b9c90;margin:-8px 0 18px;min-height:30px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:18px}.actions button{display:block!important;min-height:40px}.actions button.active{color:var(--acid);border-color:#a6d93e;background:#26351a}#sliderContainer{position:static;opacity:1;background:none;padding:0;border:0;border-radius:0;max-height:none;overflow:visible;width:auto}.slider-group{display:grid;grid-template-columns:minmax(0,1fr) 105px 47px;align-items:center;gap:8px;margin:0;padding:8px 0;border-bottom:1px solid #ffffff0d}.slider-group label{width:auto;color:#bfcdc1;font:11px monospace}.slider-group input[type=range]{position:static;width:100%;padding:0;margin:0;accent-color:var(--acid);background:transparent;min-width:0}.lock-button{position:static!important;transform:none!important;margin:0!important;padding:5px 2px!important;background:transparent!important;color:#819185!important;border:1px solid #334339!important;font:9px monospace!important}.lock-button.locked{color:var(--acid)!important;border-color:var(--acid)!important}.preset-section{margin-top:20px}#preset-toggle-btn{display:block!important;width:100%;position:static;margin:0;text-align:left}#preset-toggle-btn:before,#preset-dropdown-container:before{display:none}#preset-dropdown-container{position:static;width:100%;max-width:none;min-width:0;background:#111a14;border:0;box-shadow:none;padding:0;margin:0;overflow:hidden;transition:none}#preset-bar{display:flex;flex-wrap:wrap;gap:4px;padding:6px}.preset-bar input,.preset-bar select,.preset-bar button{position:static!important;transform:none!important;width:auto!important;min-width:0!important;margin:0!important;padding:6px!important;font:10px monospace!important;background:#1c2b20!important;border:1px solid #526454!important;color:#eaf3e6!important}.preset-name-input,.preset-dropdown{flex:1 1 95px}.current-preset-display{position:static!important;width:100%;font:10px monospace!important}.notice{font:10px/1.55 monospace;color:#7e8e81;margin:18px 0 0}.notice a{color:#b5dba9}.stage-hint{position:absolute;right:28px;bottom:24px;color:#d0e6d1;text-shadow:0 1px 5px black;font:10px monospace;letter-spacing:.16em;pointer-events:none}.stage-hint span{color:var(--acid)}
+#ui-toggle-tab{position:fixed;right:18px!important;top:82px;z-index:30;opacity:1!important;transform:none;width:auto;height:auto;background:none;border:0}#toggle-ui-btn{position:static;width:auto;height:auto;transform:none;opacity:1;background:#101a14eF;color:#d7e6d9;border:1px solid #64776a;padding:10px 12px;font:10px monospace;letter-spacing:.08em}body.ui-hidden .shell{visibility:hidden}body.ui-hidden #ui-toggle-tab{visibility:visible}body.ui-hidden #preset-toggle-btn,body.ui-hidden #preset-dropdown-container{display:none!important}#wired-btn{display:none!important}.notification{z-index:50}
+@media(max-width:700px){.topbar{height:58px;padding:0 15px}.top-right .system-status{display:none}#landing{inset:58px 0 0;padding:34px 20px;align-items:start}.intro{grid-template-columns:1fr;gap:30px}.intro h1{font-size:clamp(56px,14vw,88px);margin:22px 0}.intro p{font-size:14px}.visual{height:190px;grid-row:1}.visual-center{font-size:60px}.launch{margin-top:22px}.control-panel{margin:8px;width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 78px)}#ui-toggle-tab{right:10px!important;top:66px}.stage-hint{display:none}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+.library,.glyph-section{padding:15px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:15px}.library input,.library select,.glyph-section select{display:block;position:static;transform:none;width:100%;max-width:100%;height:36px;margin:0 0 7px;padding:7px 8px;background:#101914;border:1px solid #415548;color:#edf6e9;font:11px monospace;border-radius:0}.machine-row{display:flex;gap:4px}.machine-row select{flex:1;min-width:0}.machine-row button,.preset-actions button,.preset-actions label{position:static;transform:none;margin:0;display:grid;place-items:center;border:1px solid #415548;background:#19251c;color:#d8e9d8;padding:7px;font:10px monospace;cursor:pointer}.machine-row button{height:36px}.preset-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.preset-actions input[type=file]{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0}.preset-actions button:hover,.preset-actions label:hover{border-color:var(--acid);color:var(--acid)}.library-help,#preset-status{font:10px/1.5 monospace;color:#8c9c8f;margin:5px 0 12px}#preset-status{margin:8px 0 0}#preset-status.error{color:#ffb098}.glyph-section{border-top:0;padding-top:0}#glyph-info{margin:0}.slider-group label{overflow-wrap:anywhere}
+</style><style>
+#sourceVideo{object-fit:contain;background:#000;z-index:1}.topbar{-webkit-app-region:drag;app-region:drag;user-select:none}.top-right,.top-right *{-webkit-app-region:no-drag;app-region:no-drag}.projector-brand{display:flex;align-items:center;gap:12px}.projector-brand strong{font-size:12px;letter-spacing:.16em}.projector-brand small{display:block;font:9px monospace;color:#899690;letter-spacing:.15em;margin-top:4px}.drag-hint{font:9px monospace;color:#65786b;letter-spacing:.1em;margin-left:12px}.top-right select,.top-right button{position:static;transform:none;opacity:1;width:auto;max-width:220px;padding:8px;background:#151e18;border:1px solid #4a5c4d;color:#e8f5e8;font:11px monospace}.top-right button{min-width:35px}.top-right button:hover{color:#d4ff50;border-color:#d4ff50}.launch #open-source{position:static;transform:none;background:#d4ff50;color:#111b0c;border:1px solid #d4ff50;font:700 11px monospace;letter-spacing:.08em;padding:15px 20px}.launch #open-source:hover{background:#ecffb4}.file-label{display:grid;place-items:center;border:1px solid #526454;color:#d8e9d8;padding:12px;font:10px monospace;cursor:pointer;white-space:nowrap}#video-file{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}#launch-status{font:11px/1.5 monospace;color:#a4b6a7}#launch-status.error,#source-status.error,#panel-status.error{color:#ffaaa0}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}dialog#source-dialog{position:fixed;inset:0;width:min(900px,90vw);max-width:900px;max-height:80vh;overflow:auto;background:#101713;color:#edf6ec;border:1px solid #596f5d;padding:25px;z-index:100;border-radius:0;box-shadow:0 20px 100px #000}.source-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:18px 0}.dialog-head{display:flex;justify-content:space-between;align-items:start}.dialog-head h2{margin:8px 0;font-size:26px}.dialog-head button,#refresh-sources,.source-card{position:static;transform:none;opacity:1}.dialog-head button,#refresh-sources{background:#1c2b20;color:#edf6ec;border:1px solid #526454;padding:9px 12px;font:11px monospace}.source-card{display:flex;flex-direction:column;gap:0;text-align:left;padding:0;border:1px solid #3e5543;background:#19231b;overflow:hidden;color:white}.source-card:hover{border-color:#d4ff50}.source-card img,.source-placeholder{display:block;width:100%;height:110px;object-fit:contain;background:#060806}.source-placeholder{display:grid;place-items:center;color:#738279;font:10px monospace}.source-name{display:block;padding:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;width:100%;font:11px monospace}.dialog-note,#source-status{font:11px/1.5 monospace;color:#a0b3a4}dialog::backdrop{background:#000c}#drop-indicator{display:none;position:fixed;inset:0;z-index:200;pointer-events:none;background:#071b12e8;border:5px dashed #d4ff50;place-items:center;color:#d4ff50;font:700 24px monospace}.dragging-file #drop-indicator{display:grid}@media(max-width:700px){.drag-hint,.projector-brand small{display:none}.topbar{gap:5px}.top-right{gap:4px}.top-right select{max-width:120px}.top-right button{min-width:27px;padding:7px}.projector-brand strong{font-size:10px}.brand-icon{height:25px;width:25px}}</style></head><body> <svg class="background-svg" height="0" width="0">
+<filter color-interpolation-filters="sRGB" id="ai-warp-filter">
+<!-- 1. WARPING STAGE for "twists" and "crunches" -->
+<feturbulence basefrequency="0.005" id="ai-turbulence-large" numoctaves="1" result="large_noise" seed="1" type="turbulence"></feturbulence>
+<feturbulence basefrequency="0.05" id="ai-turbulence-small" numoctaves="2" result="small_noise" seed="2" type="turbulence"></feturbulence>
+<fedisplacementmap in="large_noise" in2="small_noise" result="warped_noise" scale="40"></fedisplacementmap>
+<fedisplacementmap id="ai-displacement" in="SourceGraphic" in2="warped_noise" result="displaced_video" scale="0" xchannelselector="R" ychannelselector="G"></fedisplacementmap>
+<fecolormatrix id="ai-color-matrix" in="displaced_video" type="hueRotate" values="0"></fecolormatrix>
+<!-- All color/rainbow/blotch/gradient effects removed -->
+</filter>
+</svg>
+<div id="effects-wrapper"><video aria-label="Captured screen or local video" autoplay="" id="sourceVideo" muted="" playsinline=""></video><canvas aria-hidden="true" id="glitchCanvas"></canvas></div>
+<div class="shell"><header class="topbar"><div class="projector-brand"><span class="brand-icon">↗</span><span><strong>GLITCH CANVAS</strong><small>PROJECTOR APP</small></span><span class="drag-hint">DRAG WINDOW</span></div><div class="top-right"><label class="sr-only" for="display-select">Target monitor or projector</label><select id="display-select" title="Move this window to a monitor or projector"><option value="">Move to display…</option></select><button aria-label="Minimize" id="minimize-window" title="Minimize">−</button><button aria-label="Enter fullscreen" id="fullscreen-window" title="Fullscreen · Ctrl+Alt+F">□</button><button aria-label="Close" id="close-window" title="Close">×</button></div></header>
+<section id="landing"><div class="intro"><div><div class="eyebrow">YOUR SCREEN / YOUR SIGNAL</div><h1>Glitch<span>Projector.</span></h1><p>Turn a screen, application window or local video into a live canvas. Choose a source, pick a machine mix and move the borderless window onto your projector.</p><div class="launch"><button id="open-source" type="button">CHOOSE SCREEN OR WINDOW ↗</button><label class="file-label" for="video-file">OPEN VIDEO</label><input accept="video/*,.mp4,.webm,.ogv,.mov,.m4v" id="video-file" type="file"/></div><p class="subnote">BEST WITHOUT HEADPHONES / DROP A VIDEO FILE TO PLAY</p><p aria-live="polite" id="launch-status" role="status">No source is being shared.</p><p class="subnote" id="shortcut-note">FULLSCREEN: CTRL + ALT + F · DRAG THE TOP BAR TO MOVE</p></div><div aria-hidden="true" class="visual"><div class="visual-label">PROJECTOR_01 // READY</div><div class="visual-center"><span>G/01</span></div><div class="visual-code">YOUR INPUT · YOUR CANVAS ▮▮▮</div></div></div></section>
+<main id="workspace"><aside class="control-panel"><div class="panel-top"><div class="section-kicker">● SOURCE ACTIVE</div><h2>Shape the signal.</h2><p>Choose a look, then fine-tune each layer.</p><p aria-live="polite" id="panel-status" role="status">Ready.</p></div><div class="panel-scroll"><div class="panel-label"><span>01 / Starting looks</span><b>SELECT</b></div><div class="looks"><button data-look="analog">ANALOG</button><button data-look="spectral">SPECTRAL</button><button data-look="datastream">DATA</button><button data-look="rift">PRISM</button><button data-look="orbit">ORBIT</button><button data-look="rupture">RUPTURE</button><button data-look="r3matrix">R3 MATRIX</button><button data-look="r3aurora">R3 AURORA</button><button data-look="r3ghost">R3 GHOST</button><button data-look="frameecho">FRAME ECHO</button><button data-look="timeslices">TIME SLICES</button></div><p class="look-description" id="look-description">Pick a look to start the effect layers.</p><section aria-labelledby="library-title" class="library"><div class="panel-label" id="library-title"><span>02 / MACHINE LIBRARY</span><b id="machine-count">250 / 250</b></div><input aria-label="Search machine presets" id="machine-search" placeholder="Search machine presets or ID" type="search"/><div class="machine-row"><button aria-label="Previous machine preset" id="machine-prev" title="Previous machine preset">◀</button><select aria-label="Machine presets" id="machine-select"></select><button aria-label="Next machine preset" id="machine-next" title="Next machine preset">▶</button></div><p class="library-help">250 fixed mixes · their settings never change automatically</p><div class="panel-label"><span>YOUR SAVED PRESETS</span><b>LOCAL</b></div><select aria-label="Saved presets" id="user-presets"></select><input aria-label="Preset name" id="user-preset-name" maxlength="80" placeholder="Name your preset"/><div class="preset-actions"><button id="user-save">SAVE</button><button id="user-delete">DELETE</button><button id="user-export">EXPORT</button><label for="user-import">IMPORT</label><input accept="application/json,.json" id="user-import" type="file"/></div><p aria-live="polite" id="preset-status" role="status">Personal presets stay in this browser. Export a backup to keep them.</p></section><section class="glyph-section"><div class="panel-label"><span>03 / GLYPH TABLES</span><b>UNICODE</b></div><select aria-label="Character table" id="glyph-bank"><option value="All scripts">All scripts (mixed)</option></select><p class="library-help" id="glyph-info"></p></section><div class="panel-label"><span>04 / Transmission</span><b>CONTROL</b></div><div class="actions"><button id="autoGlitchBtn">Auto Glitch: OFF</button><button id="randomizeBtn">Randomize</button><button id="continualRandomizeBtn">Continual Randomization: OFF</button><button id="aiWarpBtn">AI Video Warp: OFF</button></div><div class="panel-label"><span>05 / Effect levels</span><b>ADJUST</b></div><div id="sliderContainer"><div class="slider-group"><label for="randomSeedSlider">Random seed</label><input id="randomSeedSlider" max="1" min="0" step="0.001" type="range" value="0"/></div></div><p class="notice">R3 effects use the AI Warp 6.4.38.21 / Glitch Revision 3 factory bank. Screen sharing is video only; device audio is not captured. Flashing effects are available. Glyph visibility depends on installed fonts. Tech Artist needs WebGL.</p><button class="new-source" id="new-source" style="width:100%;margin-top:10px">CHANGE SCREEN / WINDOW</button><button class="new-source" id="stop-source" style="width:100%;margin-top:6px">STOP SOURCE</button></div></aside><div class="stage-hint"><span>●</span> <span id="live-source">SOURCE ACTIVE</span></div></main></div><div id="ui-toggle-tab"><button id="toggle-ui-btn">HIDE CONTROL U.I.</button></div>
+<script src="glitch-engine.js"></script><script src="r3-ghost-vsync.js"></script><script src="r3-factories.js"></script><script src="glyph-library.js"></script><script src="projector-effects.js"></script><script src="effects.js"></script><dialog aria-labelledby="source-dialog-title" id="source-dialog"><div class="dialog-head"><div><div class="section-kicker">CAPTURE INPUT</div><h2 id="source-dialog-title">Choose your source.</h2></div><button aria-label="Close source picker" id="close-source-dialog" type="button">×</button></div><p aria-live="polite" id="source-status" role="status">Choose a screen or window.</p><div class="source-grid" id="source-grid"></div><button id="refresh-sources" type="button">REFRESH SOURCES</button><p class="dialog-note">Video only. Your operating system may request screen-recording permission. Avoid choosing the display that shows this app to prevent a feedback loop.</p></dialog><div aria-hidden="true" id="drop-indicator">DROP VIDEO TO PLAY</div><script src="projector-ui.js"></script><script src="ghost-easter-egg.js"></script></body></html>

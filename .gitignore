@@ -1,0 +1,7 @@
+node_modules/
+dist/
+Glitch-Canvas-Projector-App-source.zip
+coverage/
+*.log
+.DS_Store
+.vscode/*.local.json
