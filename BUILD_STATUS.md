@@ -11,8 +11,9 @@ Done on 2026-11-02 (Windows 11 x64, single display):
 - `node --test tests/*.test.cjs` passed (5/5), including mocked main-process tests (sender/argument validation, renderer-confirmed entry, Esc and Ctrl+Alt+T exit, restore of fullscreen and always-on-top state) and renderer tests (all HUD hidden, show/hide button hidden, exit restores HUD, STOP SOURCE exits).
 - A real Electron run confirmed entering VJ mode gives opacity 0.5, fullscreen and always-on-top, and Esc restores opacity 1, windowed and not on top.
 - `npm run package:win` produced an **unsigned** NSIS installer, `Glitch Canvas Projector App Setup 1.0.1.exe`; its asar contents were checked for the VJ code and version 1.0.1.
+- GitHub Actions "Windows build" (windows-latest, Node 22): the 1.0.0 run passed `npm ci` and `npm test` but failed at packaging, because electron-builder publishes implicitly when it detects CI and no `GH_TOKEN` is set. The workflow now runs `npm run package:win -- --publish never` (nothing is published; workflow permissions stay read-only). [Run 41503085474](https://github.com/TheImortalimp/Glitch-Canvas-Projector-App/actions/runs/41503085474) on commit `17535cd` passed `npm ci` and `npm test`, packaged the unsigned installer and uploaded it as the `glitch-canvas-projector-windows-unsigned` artifact.
 
-Not done: running the installer on a clean machine, a second monitor or projector, pressing the real global Ctrl+Alt+T hotkey, code signing and SmartScreen assessment, long-session profiling, and a repeat `npm audit`. The 1.0.0 audit result below has not been re-run.
+Not done: running either installer (the local build or the CI artifact) on a clean machine, a second monitor or projector, pressing the real global Ctrl+Alt+T hotkey, code signing and SmartScreen assessment, long-session profiling, and a repeat `npm audit`. The 1.0.0 audit result below has not been re-run.
 
 ## Completed in the preparation environment (1.0.0)
 
